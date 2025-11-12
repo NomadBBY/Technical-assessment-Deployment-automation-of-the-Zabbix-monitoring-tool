@@ -1,0 +1,6 @@
+---
+- name: Configure Zabbix Monitoring
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - zabbix-automation

@@ -1,0 +1,60 @@
+---
+- name: Create a host Zabbix server
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_host: localhost
+    ansible_httpapi_port: 80
+    ansible_httpapi_use_ssl: false
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: ""
+  become: false
+  community.zabbix.zabbix_host:
+    host_name: Zabbix server
+    visible_name: Zabbix Server
+    description: Zabbix server agent
+    host_groups:
+      - Zabbix servers
+    link_templates:
+      - Linux by Zabbix agent
+      - Zabbix server health
+    status: enabled
+    state: present
+    inventory_mode: disabled
+    interfaces:
+      - type: 1
+        main: 1
+        useip: 1
+        ip: 172.168.1.51
+        dns: ""
+        port: "10050"
+
+- name: Create a host Zabbix proxy
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_host: localhost
+    ansible_httpapi_port: 80
+    ansible_httpapi_use_ssl: false
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: ""
+  become: false
+  community.zabbix.zabbix_host:
+    host_name: Zabbix proxy
+    visible_name: Zabbix Proxy
+    description: Zabbix proxy agent
+    host_groups:
+      - Zabbix servers
+    link_templates:
+      - Linux by Zabbix agent
+      - Zabbix server health
+    status: enabled
+    state: present
+    inventory_mode: disabled
+    interfaces:
+      - type: 1
+        main: 1
+        useip: 1
+        ip: 172.168.1.52
+        dns: ""
+        port: "10050"

@@ -1,0 +1,7 @@
+cd /Users/taacear3/WORK/ZABBIX/server && docker compose -f server-compose.yml down -v 
+
+cd /Users/taacear3/WORK/ZABBIX/client && docker compose -f client-compose.yml down -v
+
+cd /Users/taacear3/WORK/ZABBIX/server && docker compose -f server-compose.yml up -d 
+
+cd /Users/taacear3/WORK/ZABBIX/client && docker compose -f client-compose.yml up -d

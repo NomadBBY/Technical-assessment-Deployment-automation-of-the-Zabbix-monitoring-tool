@@ -1,0 +1,13 @@
+plugin: community.docker.docker_containers
+docker_host: unix:///var/run/docker.sock
+
+# Optional: only include running containers
+filters:
+  - include: docker_state == "running"
+
+# Automatically create groups based on image and container name
+keyed_groups:
+  - prefix: image
+    key: docker_image
+  - prefix: name
+    key: docker_name

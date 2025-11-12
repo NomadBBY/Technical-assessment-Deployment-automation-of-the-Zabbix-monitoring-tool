@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for zabbix-automation
+
+- name: Set Zabbix API credentials
+  ansible.builtin.include_tasks: set_credentials.yml
+
+- name: Add Zabbix agents to monitoring
+  ansible.builtin.include_tasks: add_zabbix_agents.yml
+
+- name: Add Zabbix proxy
+  ansible.builtin.include_tasks: add_zabbix_proxy.yml
+
+- name: Add SNMP hosts to monitoring
+  ansible.builtin.include_tasks: add_snmp_hosts.yml

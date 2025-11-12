@@ -1,0 +1,102 @@
+---
+- name: Create a host SNMP Device one
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_host: localhost
+    ansible_httpapi_port: 80
+    ansible_httpapi_use_ssl: false
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: ""
+  become: false
+  community.zabbix.zabbix_host:
+    host_name: snmp-sim1
+    visible_name: SNMP Device One
+    description: SNMP device one
+    host_groups:
+      - Discovered hosts
+    link_templates:
+      - Generic by SNMP
+    status: enabled
+    state: present
+    monitored_by: proxy
+    proxy: zabbix-snmp-proxy
+    inventory_mode: disabled
+    interfaces:
+      - type: 2
+        main: 1
+        useip: 1
+        ip: 172.168.2.21
+        dns: ""
+        port: "161"
+        details:
+          version: 3
+          securityname: "public"
+
+- name: Create a host SNMP Device two
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_host: localhost
+    ansible_httpapi_port: 80
+    ansible_httpapi_use_ssl: false
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: ""
+  become: false
+  community.zabbix.zabbix_host:
+    host_name: snmp-sim2
+    visible_name: SNMP Device Two
+    description: SNMP device two
+    host_groups:
+      - Discovered hosts
+    link_templates:
+      - Generic by SNMP
+    status: enabled
+    state: present
+    monitored_by: proxy
+    proxy: zabbix-snmp-proxy
+    inventory_mode: disabled
+    interfaces:
+      - type: 2
+        main: 1
+        useip: 1
+        ip: 172.168.2.22
+        dns: ""
+        port: "161"
+        details:
+          version: 3
+          securityname: "public"
+
+- name: Create a host SNMP Device three
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_host: localhost
+    ansible_httpapi_port: 80
+    ansible_httpapi_use_ssl: false
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: ""
+  become: false
+  community.zabbix.zabbix_host:
+    host_name: snmp-sim3
+    visible_name: SNMP Device Three
+    description: SNMP device three
+    host_groups:
+      - Discovered hosts
+    link_templates:
+      - Generic by SNMP
+    status: enabled
+    state: present
+    monitored_by: proxy
+    proxy: zabbix-snmp-proxy
+    inventory_mode: disabled
+    interfaces:
+      - type: 2
+        main: 1
+        useip: 1
+        ip: 172.168.2.23
+        dns: ""
+        port: "161"
+        details:
+          version: 3
+          securityname: "public"

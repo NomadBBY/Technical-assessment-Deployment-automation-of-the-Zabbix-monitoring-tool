@@ -1,0 +1,66 @@
+name: zabbix-client-compose
+services:
+    snmp-sim1:
+      image: tandrup/snmpsim:latest
+      platform: linux/amd64
+      container_name: snmp-sim1
+      ports:
+        - "1161:161/udp"
+      volumes:
+        - ./data/device1.snmprec:/usr/local/snmpsim/data/device1.snmprec:ro
+      networks:
+        secure-network:
+          ipv4_address: 172.168.2.21
+      command: >
+        snmpsimd.py
+        --agent-udpv4-endpoint=0.0.0.0:161
+        --data-dir=/usr/local/snmpsim/data
+        --process-user=nobody
+        --process-group=nogroup
+        --v3-user=zabbixUser/noAuthNoPriv
+      restart: unless-stopped
+
+    snmp-sim2:
+      image: tandrup/snmpsim:latest
+      platform: linux/amd64
+      container_name: snmp-sim2
+      ports:
+        - "1162:161/udp"
+      volumes:
+        - ./data/device2.snmprec:/usr/local/snmpsim/data/device2.snmprec:ro
+      networks:
+        secure-network:
+          ipv4_address: 172.168.2.22
+      command: >
+        snmpsimd.py
+        --agent-udpv4-endpoint=0.0.0.0:161
+        --data-dir=/usr/local/snmpsim/data
+        --process-user=nobody
+        --process-group=nogroup
+        --v3-user=zabbixUser/noAuthNoPriv
+      restart: unless-stopped
+
+    snmp-sim3:
+      image: tandrup/snmpsim:latest
+      platform: linux/amd64
+      container_name: snmp-sim3
+      ports:
+        - "1163:161/udp"
+      volumes:
+        - ./data/device3.snmprec:/usr/local/snmpsim/data/device3.snmprec:ro
+      networks:
+        secure-network:
+          ipv4_address: 172.168.2.23
+      command: >
+        snmpsimd.py
+        --agent-udpv4-endpoint=0.0.0.0:161
+        --data-dir=/usr/local/snmpsim/data
+        --process-user=nobody
+        --process-group=nogroup
+        --v3-user=zabbixUser/noAuthNoPriv
+      restart: unless-stopped
+
+networks:
+  secure-network:
+    external: true
+    name: server-compose_secure-network
