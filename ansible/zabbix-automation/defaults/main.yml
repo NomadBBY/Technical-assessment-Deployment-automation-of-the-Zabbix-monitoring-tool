@@ -14,18 +14,30 @@ zabbix_api_validate_certs: false
 zabbix_api_url_path: ""
 
 # Zabbix server configuration
-zabbix_server_agent_ip: 172.168.1.51
+zabbix_server_agent_ip: 172.168.1.31
 zabbix_server_agent_port: "10050"
 
 # Zabbix proxy configuration
-zabbix_proxy_agent_ip: 172.168.1.52
+zabbix_proxy_agent_ip: 172.168.1.32
 zabbix_proxy_agent_port: "10050"
-zabbix_proxy_address: 172.168.1.40
+zabbix_proxy_address: 172.168.1.20
 
 # SNMP devices configuration
 snmp_device_ips:
   - ip: 172.168.2.21
     name: snmp-sim1
     visible_name: "SNMP Device One"
+    port: "161"
+    community: "public"
+
+  - ip: 172.168.2.22
+    name: snmp-sim2
+    visible_name: "SNMP Device Two"
+    port: "161"
+    community: "public"
+    
+  - ip: 172.168.2.23
+    name: snmp-sim3
+    visible_name: "SNMP Device Three"
     port: "161"
     community: "public"

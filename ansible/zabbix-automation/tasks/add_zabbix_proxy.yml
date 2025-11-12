@@ -9,8 +9,8 @@
     ansible_httpapi_validate_certs: false
     ansible_zabbix_url_path: ""
   community.zabbix.zabbix_proxy:
-    address: 172.168.1.40
-    allowed_addresses: "172.168.1.40"
+    address: 172.168.1.20
+    allowed_addresses: "172.168.1.20, 172.168.2.0/24"
     description: zabbix-snmp-proxy
     proxy_name: zabbix-snmp-proxy
     operating_mode: active

@@ -5,12 +5,12 @@ services:
     container_name: zabbix-server
     networks:
       docker-cloud:
-        ipv4_address: 172.168.1.20
+        ipv4_address: 172.168.1.10
     ports:
       - "10051:10051"
     environment:
       - DB_SERVER_HOST=mysql-server
-      - mysql-server=zabbix
+      - MYSQL_DATABASE=zabbix
       - MYSQL_USER=zabbix
       - MYSQL_PASSWORD=zabbix_password
       - MYSQL_ROOT_PASSWORD=root_password
@@ -22,11 +22,11 @@ services:
     container_name: mysql-server
     networks:
       docker-cloud:
-        ipv4_address: 172.168.1.10
+        ipv4_address: 172.168.1.11
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_DATABASE="zabbix"
+      - MYSQL_DATABASE=zabbix
       - MYSQL_USER=zabbix
       - MYSQL_PASSWORD=zabbix_password
       - MYSQL_ROOT_PASSWORD=root_password 
@@ -39,17 +39,17 @@ services:
     container_name: zabbix-frontend
     networks:
       docker-cloud:
-        ipv4_address: 172.168.1.30
+        ipv4_address: 172.168.1.12
     ports:
       - "80:8080"
 
     environment:
       - DB_SERVER_HOST=mysql-server
-      - mysql-server=zabbix
+      - MYSQL_DATABASE=zabbix
       - MYSQL_USER=zabbix
       - MYSQL_PASSWORD=zabbix_password
       - ZBX_SERVER_HOST=zabbix_server
-      - PHP_TZ=America/New_York
+      - PHP_TZ=Latvia/Riga
     depends_on:
       - mysql-server
       - zabbix_server
@@ -59,14 +59,14 @@ services:
     container_name: zabbix-proxy
     networks:
       docker-cloud:
-        ipv4_address: 172.168.1.40
+        ipv4_address: 172.168.1.20
       secure-network:
         ipv4_address: 172.168.2.10
     ports:
       - "10061:10051"
     environment:
       - ZBX_HOSTNAME=zabbix-snmp-proxy
-      - ZBX_SERVER_HOST=172.168.1.20
+      - ZBX_SERVER_HOST=172.168.1.10
       - ZBX_ENABLESNMPTRAPS=true
       - ZBX_PROXYMODE=0
     volumes:
@@ -75,18 +75,17 @@ services:
       - zabbix_server
     restart: unless-stopped
 
-# Maybe remove this agent from server-compose.yml later
   zabbix_server_agent:
     image: zabbix/zabbix-agent:latest
     container_name: zabbix-server-agent
     networks:
       docker-cloud:
-        ipv4_address: 172.168.1.51
+        ipv4_address: 172.168.1.31
     ports:
       - "10050:10050"
     environment:
       - ZBX_HOSTNAME=Zabbix server
-      - ZBX_SERVER_HOST=172.168.1.20
+      - ZBX_SERVER_HOST=172.168.1.10
       - ZBX_PASSIVE_ALLOW=true
     depends_on:
       - zabbix_server
@@ -97,12 +96,12 @@ services:
     container_name: zabbix-proxy-agent
     networks:
       docker-cloud:
-        ipv4_address: 172.168.1.52
+        ipv4_address: 172.168.1.32
     ports:
       - "10052:10050"
     environment:
       - ZBX_HOSTNAME=Zabbix proxy
-      - ZBX_SERVER_HOST=172.168.1.20
+      - ZBX_SERVER_HOST=172.168.1.10
       - ZBX_PASSIVE_ALLOW=true
     depends_on:
       - zabbix_proxy
