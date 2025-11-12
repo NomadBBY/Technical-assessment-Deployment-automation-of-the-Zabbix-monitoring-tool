@@ -10,8 +10,11 @@
     ansible_zabbix_url_path: ""
   community.zabbix.zabbix_proxy:
     address: 172.168.1.20
-    allowed_addresses: "172.168.1.20, 172.168.2.0/24"
+    allowed_addresses: "172.168.1.20"
     description: zabbix-snmp-proxy
     proxy_name: zabbix-snmp-proxy
     operating_mode: active
     state: present
+    tls_accept: PSK
+    tls_psk_identity: "PSK-zabbix-snmp-proxy"
+    tls_psk: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"

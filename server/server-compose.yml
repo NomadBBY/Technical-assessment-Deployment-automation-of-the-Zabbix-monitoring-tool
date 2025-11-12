@@ -69,8 +69,13 @@ services:
       - ZBX_SERVER_HOST=172.168.1.10
       - ZBX_ENABLESNMPTRAPS=true
       - ZBX_PROXYMODE=0
+      - ZBX_TLSCONNECT=psk
+      - ZBX_TLSACCEPT=psk
+      - ZBX_TLSPSKIDENTITY=PSK-zabbix-snmp-proxy
+      - ZBX_TLSPSKFILE=/var/lib/zabbix/enc/proxy.psk
     volumes:
       - zabbix-proxy-data:/var/lib/zabbix
+      - ./proxy-psk:/var/lib/zabbix/enc:ro
     depends_on:
       - zabbix_server
     restart: unless-stopped
