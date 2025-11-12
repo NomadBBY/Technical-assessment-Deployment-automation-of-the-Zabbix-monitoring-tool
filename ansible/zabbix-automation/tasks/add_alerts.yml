@@ -1,0 +1,67 @@
+- name: Deploy one/All of SNMP hosts not active trigger action
+  become: false
+  community.zabbix.zabbix_action:
+    name: "SNMP hosts not active"
+    event_source: "trigger"
+    state: present
+    status: enabled
+    esc_period: 60
+    conditions:
+      - type: "trigger_severity"
+        operator: "="
+        value: "warning"
+    operations:
+      - type: send_message
+        subject: "One/All of SNMP hosts not active"
+        op_message: "Check if one of the SNMP devices is reachable. If not, please investigate."
+        media_type: "all"
+        send_to_users:
+          - "Admin"
+
+- name: Deploy Discovery action for Zabbix Agents
+  become: false
+  community.zabbix.zabbix_action:
+    name: "Auto Discovery Zabbix Agents"
+    event_source: "discovery"
+    state: present
+    status: enabled
+    esc_period: 60
+    conditions:
+      - type: "discovery_rule"
+        operator: "="
+        value: "Secure Network"
+      - type: "proxy"
+        operator: "="
+        value: "zabbix-snmp-proxy"
+      - type: "discovered_service_type"
+        operator: "="
+        value: "Zabbix agent"
+    operations:
+      - type: "add_host"
+      - type: "add_to_host_group"
+        host_groups:
+          - "Discovered hosts"
+      - type: "link_to_template"
+        templates:
+          - "Linux by Zabbix agent"
+
+- name: Deploy Autoregistration action for Proxy for Zabbix Agents
+  become: false
+  community.zabbix.zabbix_action:
+    name: "Add Hosts that get connected to the Proxy for Zabbix Agents"
+    event_source: "auto_registration"
+    state: present
+    status: enabled
+    esc_period: 60
+    conditions:
+      - type: "proxy"
+        operator: "="
+        value: "zabbix-snmp-proxy"
+    operations:
+      - type: "add_host"
+      - type: "add_to_host_group"
+        host_groups:
+          - "Discovered hosts"
+      - type: "link_to_template"
+        templates:
+          - "Linux by Zabbix agent"

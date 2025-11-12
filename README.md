@@ -264,3 +264,4 @@ docker exec zabbix-proxy snmpwalk -v3 -u zabbixUser -l noAuthNoPriv 172.168.2.21
 - [Zabbix Documentation](https://www.zabbix.com/documentation/current)
 - [Zabbix Docker Images](https://hub.docker.com/u/zabbix)
 - [Zabbix Create Hosts](https://docs.ansible.com/projects/ansible/latest/collections/community/zabbix/index.html)
+- [snmpsim](https://pypi.org/project/snmpsim/)

@@ -1,0 +1,15 @@
+- name: Create discovery rule with ICMP and zabbix agent checks
+  become: false
+  community.zabbix.zabbix_discovery_rule:
+    name: Secure Network
+    state: present
+    iprange: 172.168.2.30-33
+    proxy: zabbix-snmp-proxy
+    delay: 10s # optional, default is 1h
+    dchecks:
+        - type: Zabbix
+          key: "agent.hostname"
+          ports: "10050"
+          uniq: false
+          host_source: "discovery"
+          name_source: "discovery"

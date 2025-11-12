@@ -60,7 +60,36 @@ services:
         --v3-user=zabbixUser/noAuthNoPriv
       restart: unless-stopped
 
+    zabbix-agent1:
+      image: zabbix/zabbix-agent:latest
+      container_name: zabbix-agent1
+      networks:
+        secure-network:
+          ipv4_address: 172.168.2.31
+      ports:
+        - "10070:10050"
+      environment:
+        - ZBX_HOSTNAME=Network Discovered Zabbix Agent One
+        - ZBX_SERVER_HOST=172.168.2.10
+        - ZBX_PASSIVE_ALLOW=true
+      restart: unless-stopped
+
+    zabbix-agent2:
+      image: zabbix/zabbix-agent:latest
+      container_name: zabbix-agent2
+      networks:
+        secure-network:
+          ipv4_address: 172.168.2.32
+      ports:
+        - "10071:10050"
+      environment:
+        - ZBX_HOSTNAME=Network Discovered Zabbix Agent Two 
+        - ZBX_SERVER_HOST=172.168.2.10
+        - ZBX_PASSIVE_ALLOW=true
+      restart: unless-stopped
+
 networks:
   secure-network:
     external: true
     name: server-compose_secure-network
+

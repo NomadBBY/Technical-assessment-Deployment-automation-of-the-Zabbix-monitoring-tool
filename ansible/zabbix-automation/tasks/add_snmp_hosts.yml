@@ -1,13 +1,5 @@
 ---
 - name: Create a host SNMP Device one
-  vars:
-    ansible_network_os: community.zabbix.zabbix
-    ansible_connection: httpapi
-    ansible_host: localhost
-    ansible_httpapi_port: 80
-    ansible_httpapi_use_ssl: false
-    ansible_httpapi_validate_certs: false
-    ansible_zabbix_url_path: ""
   become: false
   community.zabbix.zabbix_host:
     host_name: snmp-sim1
@@ -31,17 +23,9 @@
         port: "161"
         details:
           version: 3
-          securityname: "public"
+          securityname: "zabbixUser"
 
 - name: Create a host SNMP Device two
-  vars:
-    ansible_network_os: community.zabbix.zabbix
-    ansible_connection: httpapi
-    ansible_host: localhost
-    ansible_httpapi_port: 80
-    ansible_httpapi_use_ssl: false
-    ansible_httpapi_validate_certs: false
-    ansible_zabbix_url_path: ""
   become: false
   community.zabbix.zabbix_host:
     host_name: snmp-sim2
@@ -65,17 +49,9 @@
         port: "161"
         details:
           version: 3
-          securityname: "public"
+          securityname: "zabbixUser"
 
 - name: Create a host SNMP Device three
-  vars:
-    ansible_network_os: community.zabbix.zabbix
-    ansible_connection: httpapi
-    ansible_host: localhost
-    ansible_httpapi_port: 80
-    ansible_httpapi_use_ssl: false
-    ansible_httpapi_validate_certs: false
-    ansible_zabbix_url_path: ""
   become: false
   community.zabbix.zabbix_host:
     host_name: snmp-sim3
@@ -99,4 +75,4 @@
         port: "161"
         details:
           version: 3
-          securityname: "public"
+          securityname: "zabbixUser"

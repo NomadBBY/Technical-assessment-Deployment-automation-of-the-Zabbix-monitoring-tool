@@ -1,13 +1,5 @@
 ---
 - name: Create or update a proxy with operating_mode passive
-  vars:
-    ansible_network_os: community.zabbix.zabbix
-    ansible_connection: httpapi
-    ansible_host: localhost
-    ansible_httpapi_port: 80
-    ansible_httpapi_use_ssl: false
-    ansible_httpapi_validate_certs: false
-    ansible_zabbix_url_path: ""
   community.zabbix.zabbix_proxy:
     address: 172.168.1.20
     allowed_addresses: "172.168.1.20"
