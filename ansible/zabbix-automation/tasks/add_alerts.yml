@@ -8,60 +8,83 @@
     esc_period: 60
     conditions:
       - type: "trigger_severity"
-        operator: "="
+        operator: ">="
         value: "warning"
+      - type: "trigger"
+        operator: "="
+        value: "Linux: Unavailable by ICMP ping"
+      - type: "trigger"
+        operator: "="
+        value: "Linux: No SNMP data collection"
+      - type: "trigger"
+        operator: "="
+        value: "Linux: Load average is too high"
+      - type: "trigger"
+        operator: "="
+        value: "Linux: Lack of available memory"
+      - type: "trigger"
+        operator: "="
+        value: "Linux: High ICMP ping loss"
     operations:
-      - type: send_message
-        subject: "One/All of SNMP hosts not active"
-        op_message: "Check if one of the SNMP devices is reachable. If not, please investigate."
+      - type: "send_message"
+        subject: "Zabbix SNMP Host Alert: Connectivity or Performance Issue"
+        op_message: |
+          One or more Zabbix SNMP hosts are reporting problems.
+
+          Host: {HOST.NAME}
+          Problem: {TRIGGER.NAME}
+          Severity: {TRIGGER.SEVERITY}
+          Time: {EVENT.DATE} {EVENT.TIME}
+
+          Please verify connectivity and investigate the issue.
         media_type: "all"
         send_to_users:
           - "Admin"
+        send_to_groups:
+          - "Zabbix administrators"
 
-- name: Deploy Discovery action for Zabbix Agents
+- name: Deploy Zabbix action for Linux agent unavailability and performance triggers
   become: false
   community.zabbix.zabbix_action:
-    name: "Auto Discovery Zabbix Agents"
-    event_source: "discovery"
+    name: "Zabbix Agent hosts not active"
+    event_source: "trigger"
     state: present
-    status: enabled
+    status: "enabled"
     esc_period: 60
     conditions:
-      - type: "discovery_rule"
+      - type: "trigger_severity"
+        operator: ">="
+        value: "warning"
+      - type: "trigger"
         operator: "="
-        value: "Secure Network"
-      - type: "proxy"
+        value: "Linux: Zabbix agent is not available"
+      - type: "trigger"
         operator: "="
-        value: "zabbix-snmp-proxy"
-      - type: "discovered_service_type"
+        value: "Linux: Load average is too high"
+      - type: "trigger"
         operator: "="
-        value: "Zabbix agent"
+        value: "Linux: Lack of available memory"
+      - type: "trigger"
+        operator: "="
+        value: "Linux: High memory utilization"
+      - type: "trigger"
+        operator: "="
+        value: "Linux: High CPU utilization"
     operations:
-      - type: "add_host"
-      - type: "add_to_host_group"
-        host_groups:
-          - "Discovered hosts"
-      - type: "link_to_template"
-        templates:
-          - "Linux by Zabbix agent"
+      - type: "send_message"
+        subject: "Zabbix Agent Host Alert: Connectivity or Performance Issue"
+        op_message: |
+          One or more Zabbix Agent hosts are reporting problems.
 
-- name: Deploy Autoregistration action for Proxy for Zabbix Agents
-  become: false
-  community.zabbix.zabbix_action:
-    name: "Add Hosts that get connected to the Proxy for Zabbix Agents"
-    event_source: "auto_registration"
-    state: present
-    status: enabled
-    esc_period: 60
-    conditions:
-      - type: "proxy"
-        operator: "="
-        value: "zabbix-snmp-proxy"
-    operations:
-      - type: "add_host"
-      - type: "add_to_host_group"
-        host_groups:
-          - "Discovered hosts"
-      - type: "link_to_template"
-        templates:
-          - "Linux by Zabbix agent"
+          Host: {HOST.NAME}
+          Problem: {TRIGGER.NAME}
+          Severity: {TRIGGER.SEVERITY}
+          Time: {EVENT.DATE} {EVENT.TIME}
+
+          Please verify connectivity and investigate the issue.
+        media_type: "all"
+        send_to_users:
+          - "Admin"
+        send_to_groups:
+          - "Zabbix administrators"
+

@@ -15,9 +15,11 @@ A complete Zabbix monitoring solution deployed using Docker Compose with separat
 
 ### Client Services (client-compose.yml)
 
-- **SNMP Simulator One** (`snmp-sim1 - SNMP device simulator for Simulated Router #1 (172.168.2.21-23)
-- **SNMP Simulator Two** (`snmp-sim2) - SNMP device simulator for Simulated Switch #2 (172.168.2.22)
-- **SNMP Simulator Three** (`snmp-sim3) - SNMP device simulator for Simulated Firewall #3 (172.168.2.23)
+- **SNMP Simulator One** (`snmp-sim1`) - SNMP device simulator for Simulated Router #1 (172.168.2.21)
+- **SNMP Simulator Two** (`snmp-sim2`) - SNMP device simulator for Simulated Switch #2 (172.168.2.22)
+- **SNMP Simulator Three** (`snmp-sim3`) - SNMP device simulator for Simulated Firewall #3 (172.168.2.23)
+- **Zabbix Agent 1** (`zabbix-agent1`) - Zabbix agent for network discovery testing (172.168.2.31)
+- **Zabbix Agent 2** (`zabbix-agent2`) - Zabbix agent for network discovery testing (172.168.2.32)
 
 ### Networks
 
@@ -43,6 +45,8 @@ A complete Zabbix monitoring solution deployed using Docker Compose with separat
 | SNMP Sim 1 | 1161 | 161/udp | SNMP device simulator 1 |
 | SNMP Sim 2 | 1162 | 161/udp | SNMP device simulator 2 |
 | SNMP Sim 3 | 1163 | 161/udp | SNMP device simulator 3 |
+| Zabbix Agent 1 | 10070 | 10050 | Test agent 1 |
+| Zabbix Agent 2 | 10071 | 10050 | Test agent 2 |
 
 ## IP Address Reference
 
@@ -64,6 +68,8 @@ A complete Zabbix monitoring solution deployed using Docker Compose with separat
 172.168.2.21  - SNMP Simulator 1
 172.168.2.22  - SNMP Simulator 2
 172.168.2.23  - SNMP Simulator 3
+172.168.2.31  - Zabbix Agent 1
+172.168.2.32  - Zabbix Agent 2
 ```
 
 ## Quick Start
@@ -177,6 +183,64 @@ This will automatically:
 - Configure all monitored hosts (agents and SNMP devices)
 - Create a Zabbix Proxy
 - Apply appropriate templates and settings
+- Configure network discovery rules
+- Set up automated actions and alerts
+
+### Network Discovery
+
+The Ansible playbook configures automatic network discovery:
+
+**Discovery Rule: "Secure Network"**
+- **IP Range:** 172.168.2.30-33
+- **Monitored by:** zabbix-snmp-proxy
+- **Checks:** Zabbix agent discovery
+- **Frequency:** Every 10 seconds
+- **Purpose:** Automatically discovers Zabbix agents on the secure network
+
+### Automated Actions and Alerts
+
+The playbook configures several automated trigger-based actions and discovery actions:
+
+#### Trigger-Based Actions
+
+**1. SNMP Hosts Not Active**
+- **Event Source:** Trigger
+- **Conditions:**
+  - Trigger severity >= Warning
+  - Trigger name contains "Linux: No SNMP data collection"
+  - Trigger name contains "Linux: Unavailable by ICMP ping"
+- **Operations:**
+  - Sends email notification to Admin user
+  - Subject: "One/All of SNMP hosts not active"
+- **Purpose:** Alerts when SNMP devices experience data collection issues or become unreachable
+
+**2. Zabbix Agent Hosts Not Active**
+- **Event Source:** Trigger
+- **Conditions (any of the following):**
+  - High CPU utilization
+  - High memory utilization
+  - High swap space usage
+  - Lack of available memory
+  - Load average is too high
+  - Zabbix agent is not available
+- **Operations:**
+  - Sends email notification to Admin user
+  - Subject: "One/All of Zabbix Agent hosts not active"
+- **Purpose:** Alerts on critical system resource issues or agent unavailability
+
+#### Discovery-Based Actions
+
+**3. Auto Discovery for Zabbix Agents**
+- **Event Source:** Network discovery
+- **Conditions:** 
+  - Discovery rule: "Secure Network"
+  - Proxy: "zabbix-snmp-proxy"
+  - Service type: Zabbix agent
+- **Operations:**
+  - Automatically adds discovered hosts
+  - Assigns to "Discovered hosts" group
+  - Links "Linux by Zabbix agent" template
+- **Purpose:** Automatically registers newly discovered Zabbix agents
 
 ## Management Commands
 

@@ -1,7 +1,5 @@
 ---
 # vars file for zabbix-automation
-
-# Common Zabbix API connection variables
 ansible_network_os: community.zabbix.zabbix
 ansible_connection: httpapi
 ansible_host: localhost

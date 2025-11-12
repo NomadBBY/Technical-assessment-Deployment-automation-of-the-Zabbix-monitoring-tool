@@ -1,4 +1,3 @@
-#SPDX-License-Identifier: MIT-0
 ---
 # defaults file for zabbix-automation
 
@@ -41,3 +40,15 @@ snmp_device_ips:
     visible_name: "SNMP Device Three"
     port: "161"
     community: "public"
+
+# Zabbix agents configuration
+zabbix_agent_ips:
+  - ip: 172.168.1.31
+    name: zabbix-agent1
+    visible_name: "Zabbix Agent One"
+    port: "10050"
+
+  - ip: 172.168.1.32
+    name: zabbix-agent2
+    visible_name: "Zabbix Agent Two"
+    port: "10050"
