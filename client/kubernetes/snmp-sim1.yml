@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snmp-sim1
+  labels:
+    app: client-side
+    component: snmp-sim1
+    deployment: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client-side
+      component: snmp-sim1
+      deployment: development
+  template:
+    metadata:
+      labels:
+        app: client-side
+        component: snmp-sim1
+        deployment: development
+    spec:
+      containers:
+      - name: snmp-sim1
+        image: tandrup/snmpsim:latest
+        ports:
+        - containerPort: 161
+          protocol: UDP
+        # command:
+        # - "snmpsimd.py"
+        # args:
+        # - "--agent-udpv4-endpoint=0.0.0.0:161"
+        # - "--data-dir=/usr/local/snmpsim/data"
+        # - "--process-user=nobody"
+        # - "--process-group=nogroup"
+        # - "--v3-user=zabbixUser/noAuthNoPriv"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snmp-sim1
+spec:
+  selector:
+    app: client-side
+    component: snmp-sim1
+    deployment: development
+  ports:
+  - port: 161
+    targetPort: 161
+    protocol: UDP

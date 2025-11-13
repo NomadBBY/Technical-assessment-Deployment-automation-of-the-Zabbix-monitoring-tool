@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-frontend
+  labels:
+    app: zabbix
+    component: zabbix-frontend
+    deployment: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix
+      component: zabbix-frontend
+      deployment: development
+  template:
+    metadata:
+      labels:
+        app: zabbix
+        component: zabbix-frontend
+        deployment: development
+    spec:
+      containers:
+      - name: zabbix-frontend
+        image: zabbix/zabbix-web-apache-mysql:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_SERVER_HOST
+          value: "mysql-server"
+        - name: MYSQL_DATABASE
+          value: "zabbix"
+        - name: MYSQL_USER
+          value: "zabbix"
+        - name: MYSQL_PASSWORD
+          value: "zabbix_password"
+        - name: ZBX_SERVER_HOST
+          value: "zabbix-server"
+        - name: PHP_TZ
+          value: "Latvia/Riga"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-frontend
+spec:
+  type: NodePort
+  selector:
+    app: zabbix
+    component: zabbix-frontend
+    deployment: development
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30080

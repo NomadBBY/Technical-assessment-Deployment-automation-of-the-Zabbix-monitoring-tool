@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server-agent
+  labels:
+    app: zabbix
+    component: zabbix-server-agent
+    deployment: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix
+      component: zabbix-server-agent
+      deployment: development
+  template:
+    metadata:
+      labels:
+        app: zabbix
+        component: zabbix-server-agent
+        deployment: development
+    spec:
+      containers:
+      - name: zabbix-server-agent
+        image: zabbix/zabbix-agent:latest
+        ports:
+        - containerPort: 10050
+        env:
+        - name: ZBX_HOSTNAME
+          value: "Zabbix server"
+        - name: ZBX_SERVER_HOST
+          value: "zabbix-server"
+        - name: ZBX_PASSIVE_ALLOW
+          value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server-agent
+spec:
+  selector:
+    app: zabbix
+    component: zabbix-server-agent
+    deployment: development
+  ports:
+  - port: 10050
+    targetPort: 10050
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-proxy-agent
+  labels:
+    app: zabbix
+    component: zabbix-proxy-agent
+    deployment: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix
+      component: zabbix-proxy-agent
+      deployment: development
+  template:
+    metadata:
+      labels:
+        app: zabbix
+        component: zabbix-proxy-agent
+        deployment: development
+    spec:
+      containers:
+      - name: zabbix-proxy-agent
+        image: zabbix/zabbix-agent:latest
+        ports:
+        - containerPort: 10050
+        env:
+        - name: ZBX_HOSTNAME
+          value: "Zabbix proxy"
+        - name: ZBX_SERVER_HOST
+          value: "zabbix-server"
+        - name: ZBX_PASSIVE_ALLOW
+          value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-proxy-agent
+spec:
+  selector:
+    app: zabbix
+    component: zabbix-proxy-agent
+    deployment: development
+  ports:
+  - port: 10050
+    targetPort: 10050
