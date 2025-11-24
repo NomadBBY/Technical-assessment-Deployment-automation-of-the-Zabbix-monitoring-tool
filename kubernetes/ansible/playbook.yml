@@ -76,8 +76,7 @@
         host_groups:
           - Zabbix servers
         link_templates:
-          - Linux by Zabbix agent
-          - Zabbix server health
+          - Zabbix proxy health by Zabbix agent
         status: enabled
         state: present
         monitored_by: proxy
