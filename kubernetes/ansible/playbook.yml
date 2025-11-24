@@ -1,0 +1,122 @@
+- hosts: kubernetes
+  connection: local
+  tasks:
+
+    - name: Apply namespace manifests
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', '../base/namespace.yml') | from_yaml_all }}"
+
+
+    - name: Apply configmap and secret manifests
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', item) | from_yaml_all }}"
+      loop:
+        - ../base/configmap.yml
+        - ../server/snmp/snmp-configmap.yml
+
+    - name: Setup Zabbix
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', item) | from_yaml_all }}"
+      loop:
+        - ../server/mysql-server.yaml
+        - ../server/zabbix-frontend.yaml
+        - ../server/zabbix-proxy.yaml
+        - ../server/zabbix-server.yaml
+
+    - name: Set credentials to access Zabbix Server API
+      ansible.builtin.set_fact:
+        ansible_user: "Admin"
+        ansible_httpapi_pass: "zabbix"
+        ansible_network_os: "community.zabbix.zabbix"
+        ansible_connection: "httpapi"
+        ansible_httpapi_port: "80"
+        ansible_httpapi_use_ssl: "false"
+        ansible_httpapi_validate_certs: "false"
+        ansible_zabbix_url_path: ""
+        ansible_host: "localhost"
+
+    - name: Add proxy to Zabbix Server
+      community.zabbix.zabbix_proxy:
+        proxy_name: "zabbix-snmp-proxy"
+        description: zabbix-snmp-proxy
+        operating_mode: active
+        state: present
+
+    - name: Create a host Zabbix server
+      become: false
+      community.zabbix.zabbix_host:
+        host_name: Zabbix server
+        visible_name: Zabbix Server
+        description: Zabbix server agent
+        host_groups:
+          - Zabbix servers
+        link_templates:
+          - Linux by Zabbix agent
+          - Zabbix server health
+        status: enabled
+        state: present
+        inventory_mode: disabled
+        interfaces:
+          - type: 1
+            main: 1
+            useip: 1
+            ip: 127.0.0.1
+            dns: ""
+            port: "10050"
+
+    - name: Create a host Zabbix proxy
+      become: false
+      community.zabbix.zabbix_host:
+        host_name: Zabbix proxy
+        visible_name: Zabbix Proxy
+        description: Zabbix proxy agent
+        host_groups:
+          - Zabbix servers
+        link_templates:
+          - Linux by Zabbix agent
+          - Zabbix server health
+        status: enabled
+        state: present
+        monitored_by: proxy
+        proxy: zabbix-snmp-proxy
+        inventory_mode: disabled
+        interfaces:
+          - type: 1
+            main: 1
+            useip: 1
+            ip: 127.0.0.1
+            dns: "zabbix-proxy"
+            port: "10050"
+
+    - name: Create SNMP Device hosts
+      become: false
+      community.zabbix.zabbix_host:
+        host_name: "{{ item.host_name }}"
+        visible_name: "{{ item.visible_name }}"
+        description: "{{ item.description }}"
+        host_groups:
+          - Discovered hosts
+        link_templates:
+          - Generic by SNMP
+        status: enabled
+        state: present
+        monitored_by: proxy
+        proxy: zabbix-snmp-proxy
+        inventory_mode: disabled
+        interfaces:
+          - type: 2
+            main: 1
+            useip: 1
+            ip: 127.0.0.1
+            dns: ""
+            port: "{{ item.port }}"
+            details:
+              version: 3
+              securityname: "zabbixUser"
+      loop:
+        - { host_name: "snmp-sim1", visible_name: "SNMP Device One", description: "SNMP device one", port: "30161" }
+        - { host_name: "snmp-sim2", visible_name: "SNMP Device Two", description: "SNMP device two", port: "30162" }
+        - { host_name: "snmp-sim3", visible_name: "SNMP Device Three", description: "SNMP device three", port: "30163" }

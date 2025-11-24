@@ -1,0 +1,134 @@
+name: server-compose
+services:
+  zabbix_server:
+    image: zabbix/zabbix-server-mysql:latest
+    container_name: zabbix-server
+    networks:
+      docker-cloud:
+        ipv4_address: 172.168.1.10
+    ports:
+      - "10051:10051"
+    environment:
+      - DB_SERVER_HOST=mysql-server
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix_password
+      - MYSQL_ROOT_PASSWORD=root_password
+    depends_on:
+      - mysql-server
+
+  mysql-server:
+    image: mysql:8.0
+    container_name: mysql-server
+    networks:
+      docker-cloud:
+        ipv4_address: 172.168.1.11
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix_password
+      - MYSQL_ROOT_PASSWORD=root_password 
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    
+  zabbix_frontend:
+    image: zabbix/zabbix-web-apache-mysql:latest
+    container_name: zabbix-frontend
+    networks:
+      docker-cloud:
+        ipv4_address: 172.168.1.12
+    ports:
+      - "80:8080"
+
+    environment:
+      - DB_SERVER_HOST=mysql-server
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix_password
+      - ZBX_SERVER_HOST=zabbix_server
+      - PHP_TZ=Latvia/Riga
+    depends_on:
+      - mysql-server
+      - zabbix_server
+
+  zabbix_proxy:
+    image: zabbix/zabbix-proxy-sqlite3:latest
+    container_name: zabbix-proxy
+    networks:
+      docker-cloud:
+        ipv4_address: 172.168.1.20
+      secure-network:
+        ipv4_address: 172.168.2.10
+    ports:
+      - "10061:10051"
+    environment:
+      - ZBX_HOSTNAME=zabbix-snmp-proxy
+      - ZBX_SERVER_HOST=172.168.1.10
+      - ZBX_ENABLESNMPTRAPS=true
+      - ZBX_PROXYMODE=0
+      - ZBX_TLSCONNECT=psk
+      - ZBX_TLSACCEPT=psk
+      - ZBX_TLSPSKIDENTITY=PSK-zabbix-snmp-proxy
+      - ZBX_TLSPSKFILE=/var/lib/zabbix/enc/proxy.psk
+    volumes:
+      - zabbix-proxy-data:/var/lib/zabbix
+      - ./proxy-psk:/var/lib/zabbix/enc:ro
+    depends_on:
+      - zabbix_server
+    restart: unless-stopped
+
+  zabbix_server_agent:
+    image: zabbix/zabbix-agent:latest
+    container_name: zabbix-server-agent
+    networks:
+      docker-cloud:
+        ipv4_address: 172.168.1.31
+    ports:
+      - "10050:10050"
+    environment:
+      - ZBX_HOSTNAME=Zabbix server
+      - ZBX_SERVER_HOST=172.168.1.10
+      - ZBX_PASSIVE_ALLOW=true
+    depends_on:
+      - zabbix_server
+    restart: unless-stopped
+
+  zabbix_proxy_agent:
+    image: zabbix/zabbix-agent:latest
+    container_name: zabbix-proxy-agent
+    networks:
+      docker-cloud:
+        ipv4_address: 172.168.1.32
+    ports:
+      - "10052:10050"
+    environment:
+      - ZBX_HOSTNAME=Zabbix proxy
+      - ZBX_SERVER_HOST=172.168.1.10
+      - ZBX_PASSIVE_ALLOW=true
+    depends_on:
+      - zabbix_proxy
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  zabbix-proxy-data:
+
+networks:
+  docker-cloud:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.168.1.0/24
+          gateway: 172.168.1.1
+  
+  secure-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.168.2.0/24
+          gateway: 172.168.2.1

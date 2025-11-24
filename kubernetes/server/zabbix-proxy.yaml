@@ -1,0 +1,185 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zabbix-proxy-data
+  namespace: zabbix-deployment
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-proxy
+  namespace: zabbix-deployment
+  labels:
+    app: zabbix
+    component: zabbix-proxy
+    deployment: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix
+      component: zabbix-proxy
+      deployment: development
+  template:
+    metadata:
+      labels:
+        app: zabbix
+        component: zabbix-proxy
+        deployment: development
+    spec:
+      containers:
+      - name: zabbix-proxy
+        image: zabbix/zabbix-proxy-sqlite3:latest
+        ports:
+        - containerPort: 10051
+        env:
+        - name: ZBX_HOSTNAME
+          value: "zabbix-snmp-proxy"
+        - name: ZBX_SERVER_HOST
+          value: "zabbix-server"
+        - name: ZBX_ENABLESNMPTRAPS
+          value: "true"
+        - name: ZBX_PROXYMODE
+          value: "0"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        volumeMounts:
+        - name: zabbix-proxy-data
+          mountPath: /var/lib/zabbix/db_data
+      - name: zabbix-proxy-agent
+        image: zabbix/zabbix-agent:latest
+        ports:
+        - containerPort: 10050
+        env:
+        - name: ZBX_HOSTNAME
+          value: "Zabbix proxy"
+        - name: ZBX_SERVER_HOST
+          value: "127.0.0.1"
+        - name: ZBX_PASSIVE_ALLOW
+          value: "true"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      - name: snmp-client-1
+        image: tandrup/snmpsim:latest
+        ports:
+        - containerPort: 30161
+          protocol: UDP
+        command:
+        - snmpsimd.py
+        args:
+        - --agent-udpv4-endpoint=0.0.0.0:30161
+        -  --data-dir=/usr/local/snmpsim/data
+        -  --process-user=nobody
+        -  --process-group=nogroup
+        -  --v3-user=zabbixUser/noAuthNoPriv
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        volumeMounts:
+        - name: snmp-data
+          mountPath: /usr/local/snmpsim/data
+      - name: snmp-client-2
+        image: tandrup/snmpsim:latest
+        ports:
+        - containerPort: 30162
+          protocol: UDP
+        command:
+        - snmpsimd.py
+        args:
+        - --agent-udpv4-endpoint=0.0.0.0:30162
+        - --data-dir=/usr/local/snmpsim/data
+        - --process-user=nobody
+        - --process-group=nogroup
+        - --v3-user=zabbixUser/noAuthNoPriv
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        volumeMounts:
+        - name: snmp-data
+          mountPath: /usr/local/snmpsim/data
+      - name: snmp-client-3
+        image: tandrup/snmpsim:latest
+        ports:
+        - containerPort: 30163
+          protocol: UDP
+        command:
+        - snmpsimd.py
+        args:
+        - --agent-udpv4-endpoint=0.0.0.0:30163
+        - --data-dir=/usr/local/snmpsim/data
+        - --process-user=nobody
+        - --process-group=nogroup
+        - --v3-user=zabbixUser/noAuthNoPriv
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        volumeMounts:
+        - name: snmp-data
+          mountPath: /usr/local/snmpsim/data
+      volumes:
+      - name: zabbix-proxy-data
+        persistentVolumeClaim:
+          claimName: zabbix-proxy-data
+      - name: snmp-data
+        configMap:
+          name: snmp-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-proxy
+  namespace: zabbix-deployment
+spec:
+  selector:
+    app: zabbix
+    component: zabbix-proxy
+    deployment: development
+  ports:
+  - port: 10051
+    targetPort: 10051
+  type: LoadBalancer
+---
+# Zabbix Proxy Agent Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-proxy-agent
+  namespace: zabbix-deployment
+spec:
+  selector:
+    app: zabbix
+    component: zabbix-proxy-agent
+    deployment: development
+  ports:
+  - port: 10050
+    targetPort: 10050
+  type: LoadBalancer
+---
