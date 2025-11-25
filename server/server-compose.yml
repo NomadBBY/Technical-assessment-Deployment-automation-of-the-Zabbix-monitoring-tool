@@ -124,7 +124,7 @@ networks:
       config:
         - subnet: 172.168.1.0/24
           gateway: 172.168.1.1
-  
+
   secure-network:
     driver: bridge
     ipam:

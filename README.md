@@ -73,19 +73,41 @@ A complete Zabbix monitoring solution deployed using Docker Compose with separat
 ```
 
 ## Quick Start
-
-### 1. To run and Start Everthing
-
-To run server compose, client compose and the role to deploy everything
-
-```bash
-cd server && \
-docker compose -f server-compose.yml up -d && \
-cd ../client && \
-docker compose -f client-compose.yml up -d && \
 sleep 20 && \
-cd ../ansible && ansible-playbook site.yml
+
+### 1. Deploy Everything with Ansible
+
+The deployment is now fully automated using Ansible. You can control the cleanup and deployment behavior using the `cleanup_zabbix` variable, which is defined globally in the playbook or can be set in `group_vars/all.yml`.
+
+#### To deploy Zabbix monitoring:
+```bash
+cd /ansible
+ansible-playbook site.yml
 ```
+
+#### To clean up Zabbix (remove containers, volumes, networks):
+Edit `site.yml` or `group_vars/all.yml` and set:
+```yaml
+cleanup_zabbix: true
+```
+Then run:
+```bash
+ansible-playbook site.yml
+```
+
+#### To deploy (start everything):
+Set:
+```yaml
+cleanup_zabbix: false
+```
+Then run:
+```bash
+ansible-playbook site.yml
+```
+
+You can also set variables in `group_vars/all.yml` for global control across all plays and roles.
+
+---
 
 ### 2. Access Zabbix Web Interface
 
@@ -182,6 +204,17 @@ The role configures several automated trigger-based actions and discovery action
 - **Purpose:** Automatically registers newly discovered Zabbix agents
 
 ## Overview Of The zabbix-automation Role
+
+### Global Variable Usage
+
+You can set `cleanup_zabbix` in:
+- The top of `ansible/site.yml` (recommended for one-off runs)
+- `ansible/group_vars/all.yml` (recommended for persistent configuration)
+
+Example `group_vars/all.yml`:
+```yaml
+cleanup_zabbix: false  # Set to true to clean up, false to deploy
+```
 
 ### Structure 
 ```bash

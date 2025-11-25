@@ -1,6 +1,71 @@
----
-- name: Configure Zabbix Monitoring
-  hosts: localhost
+
+- hosts: localhost
+  connection: local
   gather_facts: false
-  roles:
-    - zabbix-automation
+
+  tasks:
+    - block:
+        - name: Start server containers
+          community.docker.docker_compose_v2:
+            project_src: ../server
+            files:
+              - server-compose.yml
+            state: present
+
+        - name: Start client containers
+          community.docker.docker_compose_v2:
+            project_src: ../client
+            files:
+              - client-compose.yml
+            state: present
+
+        - name: Check Zabbix server health
+          uri:
+            url: http://localhost/zabbix.php
+            method: GET
+            return_content: no
+            status_code: 200
+          register: zabbix_health_check
+          retries: 5
+          delay: 10
+          until: zabbix_health_check.status == 200
+
+        - name: Run zabbix-automation role
+          include_role:
+            name: zabbix-automation
+      when: not cleanup_zabbix
+
+    - block:
+        - name: Stop server containers
+          community.docker.docker_compose_v2:
+            project_src: ../server
+            files:
+              - server-compose.yml
+            state: absent
+
+        - name: Stop client containers
+          community.docker.docker_compose_v2:
+            project_src: ../client
+            files:
+              - client-compose.yml
+            state: absent
+
+        - name: Remove Zabbix Docker volumes
+          community.docker.docker_volume:
+            name: "{{ item }}"
+            state: absent
+          loop:
+            - mysql-data
+            - zabbix-proxy-data
+          ignore_errors: true
+
+        - name: Remove Zabbix Docker networks
+          community.docker.docker_network:
+            name: "{{ item }}"
+            state: absent
+            force: true
+          loop:
+            - docker-cloud
+            - server-compose_secure-network
+          ignore_errors: true
+      when: cleanup_zabbix
