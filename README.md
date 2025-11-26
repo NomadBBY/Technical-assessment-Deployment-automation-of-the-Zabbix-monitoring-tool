@@ -73,7 +73,6 @@ A complete Zabbix monitoring solution deployed using Docker Compose with separat
 ```
 
 ## Quick Start
-sleep 20 && \
 
 ### 1. Deploy Everything with Ansible
 
